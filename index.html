@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kamesh S - Certificate Gallery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            padding: 20px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: rgba(255,255,255,0.2);
+            padding: 15px 30px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-item .number {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .stat-item .label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            padding: 20px;
+        }
+
+        .certificate-item {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .certificate-item:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        }
+
+        .image-container {
+            width: 100%;
+            height: 300px;
+            overflow: hidden;
+            background: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .certificate-item:hover .image-container img {
+            transform: scale(1.05);
+        }
+
+        .certificate-info {
+            padding: 20px;
+        }
+
+        .certificate-info h3 {
+            color: #667eea;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .certificate-info p {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.6;
+            margin-bottom: 5px;
+        }
+
+        .certificate-info .org {
+            color: #764ba2;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .certificate-info .date {
+            color: #999;
+            font-size: 0.85em;
+            font-style: italic;
+            margin-top: 10px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            margin-top: 10px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.95);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 10px;
+            box-shadow: 0 0 50px rgba(102, 126, 234, 0.5);
+        }
+
+        .close {
+            position: absolute;
+            top: 30px;
+            right: 50px;
+            color: white;
+            font-size: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+            z-index: 1001;
+        }
+
+        .close:hover {
+            color: #667eea;
+        }
+
+        .modal-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            font-size: 40px;
+            cursor: pointer;
+            background: rgba(102, 126, 234, 0.5);
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: background 0.3s;
+            user-select: none;
+        }
+
+        .modal-nav:hover {
+            background: rgba(102, 126, 234, 0.8);
+        }
+
+        .modal-prev {
+            left: 30px;
+        }
+
+        .modal-next {
+            right: 30px;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2em;
+            }
+            
+            .gallery {
+                grid-template-columns: 1fr;
+            }
+
+            .close {
+                top: 15px;
+                right: 25px;
+                font-size: 40px;
+            }
+
+            .modal-nav {
+                font-size: 30px;
+                padding: 5px 15px;
+            }
+
+            .modal-prev {
+                left: 10px;
+            }
+
+            .modal-next {
+                right: 10px;
+            }
+        }
+
+        .upload-note {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px;
+            text-align: center;
+            color: #667eea;
+        }
+
+        .upload-note h3 {
+            margin-bottom: 10px;
+            color: #764ba2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎓 Kamesh S - Certificate Portfolio</h1>
+            <p>Sathyabama Institute of Science and Technology</p>
+            <p>B.Sc Computer Science & AI</p>
+           
+        </header>
+
+   
+        <div class="gallery">
+            <!-- Chancellor's Scholarship 2024 -->
+            <div class="certificate-item" onclick="openModal(0)">
+                <div class="image-container">
+                    <img src="1to 2 Sem.jpeg" alt="Chancellor's Scholarship 2024" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%22%23f5f5f5%22 width=%22400%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2245%25%22 font-family=%22Arial%22 font-size=%2220%22 fill=%22%23667eea%22 text-anchor=%22middle%22%3EChancellor%27s Scholarship%3C/text%3E%3Ctext x=%2250%25%22 y=%2255%25%22 font-family=%22Arial%22 font-size=%2218%22 fill=%22%23764ba2%22 text-anchor=%22middle%22%3E2024%3C/text%3E%3C/svg%3E'">
+                </div>
+                <div class="certificate-info">
+                    <h3>🏆 Chancellor's Scholarship 2024</h3>
+                    <p>Academic Excellence - 2nd Position</p>
+                    <p>Department: CS-AI (Semester 2)</p>
+                    <p class="org">Sathyabama Institute of Science and Technology</p>
+                    <span class="badge">Merit Certificate</span>
+                </div>
+            </div>
+
+            <!-- Chancellor's Scholarship 2025 -->
+            <div class="certificate-item" onclick="openModal(1)">
+                <div class="image-container">
+                    <img src="2 to 4 Sem.jpeg" alt="Chancellor's Scholarship 2025" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%22%23f0f0f0%22 width=%22400%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2245%25%22 font-family=%22Arial%22 font-size=%2220%22 fill=%22%23667eea%22 text-anchor=%22middle%22%3EChancellor%27s Scholarship%3C/text%3E%3Ctext x=%2250%25%22 y=%2255%25%22 font-family=%22Arial%22 font-size=%2218%22 fill=%22%23764ba2%22 text-anchor=%22middle%22%3E2025%3C/text%3E%3C/svg%3E'">
+                </div>
+                <div class="certificate-info">
+                    <h3>🏆 Chancellor's Scholarship 2025</h3>
+                    <p>Academic Excellence - 2nd Position</p>
+                    <p>Department: B.Sc CS-AI (Semester 4)</p>
+                    <p class="org">Sathyabama Institute of Science and Technology</p>
+                    <span class="badge">Merit Certificate</span>
+                </div>
+            </div>
+
+            <!-- Scholarship Rewards Display -->
+            <div class="certificate-item" onclick="openModal(2)">
+                <div class="image-container">
+                    <img src="Gifts and Cash DD.jpeg" alt="Scholarship Rewards" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%22%23fafafa%22 width=%22400%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2245%25%22 font-family=%22Arial%22 font-size=%2220%22 fill=%22%23667eea%22 text-anchor=%22middle%22%3EScholarship%3C/text%3E%3Ctext x=%2250%25%22 y=%2255%25%22 font-family=%22Arial%22 font-size=%2218%22 fill=%22%23764ba2%22 text-anchor=%22middle%22%3ERewards%3C/text%3E%3C/svg%3E'">
+                </div>
+                <div class="certificate-info">
+                    <h3>🎁 Scholarship Rewards</h3>
+                    <p>Notebooks, Certificates, and Bag</p>
+                    <p>Recognition for Academic Excellence</p>
+                    <p class="org">Sathyabama Institute</p>
+                    <span class="badge">Achievement</span>
+                </div>
+            </div>
+
+            <!-- Python Fullstack Internship -->
+            <div class="certificate-item" onclick="openModal(3)">
+                <div class="image-container">
+                    <img src="43735017-KAMESH.jpg" alt="GB Tech Corp Internship" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%22%23f5f5f5%22 width=%22400%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2240%25%22 font-family=%22Arial%22 font-size=%2218%22 fill=%22%23667eea%22 text-anchor=%22middle%22%3EPython Fullstack%3C/text%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-family=%22Arial%22 font-size=%2218%22 fill=%22%23667eea%22 text-anchor=%22middle%22%3EInternship%3C/text%3E%3Ctext x=%2250%25%22 y=%2265%25%22 font-family=%22Arial%22 font-size=%2214%22 fill=%22%23764ba2%22 text-anchor=%22middle%22%3EGB Tech Corp%3C/text%3E%3C/svg%3E'">
+                </div>
+                <div class="certificate-info">
+                    <h3>💼 Python Fullstack Internship</h3>
+                    <p>4 Weeks - Web Development Training</p>
+                    <p>Skills: HTML, CSS, JS, Django, MySQL, AGI</p>
+                    <p class="org">GB Tech Corp, Chennai</p>
+                    <p class="date">May 19 - June 19, 2025</p>
+                    <span class="badge">Internship</span>
+                </div>
+            </div>
+
+            <!-- Adobe Hackathon -->
+            <div class="certificate-item" onclick="openModal(4)">
+                <div class="image-container">
+                    <img src="Adobe Hackathon.jpeg" alt="Adobe Hackathon" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%22%23ffffff%22 width=%22400%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2245%25%22 font-family=%22Arial%22 font-size=%2220%22 fill=%22%23667eea%22 text-anchor=%22middle%22%3EAdobe Hackathon%3C/text%3E%3Ctext x=%2250%25%22 y=%2255%25%22 font-family=%22Arial%22 font-size=%2216%22 fill=%22%23764ba2%22 text-anchor=%22middle%22%3ETeam Amicstown%3C/text%3E%3C/svg%3E'">
+                </div>
+                <div class="certificate-info">
+                    <h3>💻 Adobe India Hackathon</h3>
+                    <p>Team Amicstown - Round 1 Participation</p>
+                    <p>Online MCQ Assessment + Coding Challenge</p>
+                    <p class="org">Adobe</p>
+                    <span class="badge">Hackathon</span>
+                </div>
+            </div>
+
+            <!-- NLP Workshop -->
+            <div class="certificate-item" onclick="openModal(5)">
+                <div class="image-container">
+                    <img src="NLP.jpeg" alt="NLP Workshop" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%22%23f8f8f8%22 width=%22400%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2245%25%22 font-family=%22Arial%22 font-size=%2218%22 fill=%22%23667eea%22 text-anchor=%22middle%22%3EIntroduction to NLP%3C/text%3E%3Ctext x=%2250%25%22 y=%2260%25%22 font-family=%22Arial%22 font-size=%2214%22 fill=%22%23764ba2%22 text-anchor=%22middle%22%3EFirstBit Solutions%3C/text%3E%3C/svg%3E'">
+                </div>
+                <div class="certificate-info">
+                    <h3>🤖 Introduction to NLP</h3>
+                    <p>Natural Language Processing Workshop</p>
+                    <p class="org">FirstBit Solutions</p>
+                    <p class="date">October 11, 2025</p>
+                    <span class="badge">Workshop</span>
+                </div>
+            </div>
+
+            <!-- SPIKE 2K25 - Paper Presentation -->
+            <div class="certificate-item" onclick="openModal(6)">
+                <div class="image-container">
+                    <img src="paperppt (p1).jpg" alt="SPIKE Paper Presentation" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%22%23f0f0f0%22 width=%22400%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2242%25%22 font-family=%22Arial%22 font-size=%2220%22 fill=%22%23667eea%22 text-anchor=%22middle%22%3ESPIKE 2K25%3C/text%3E%3Ctext x=%2250%25%22 y=%2258%25%22 font-family=%22Arial%22 font-size=%2216%22 fill=%22%23764ba2%22 text-anchor=%22middle%22%3EPaper Presentation%3C/text%3E%3C/svg%3E'">
+                </div>
+                <div class="certificate-info">
+                    <h3>📄 SPIKE 2K25 - Paper Presentation</h3>
+                    <p>National Level Technical Symposium</p>
+                    <p class="org">Bharath Institute (BIHER)</p>
+                    <p class="date">October 15, 2025</p>
+                    <span class="badge">Symposium</span>
+                </div>
+            </div>
+
+            <!-- SPIKE 2K25 - Project Demo -->
+            <div class="certificate-item" onclick="openModal(7)">
+                <div class="image-container">
+                    <img src="Project demo (p1).jpg" alt="SPIKE Project Demo" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%22%23fafafa%22 width=%22400%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2242%25%22 font-family=%22Arial%22 font-size=%2220%22 fill=%22%23667eea%22 text-anchor=%22middle%22%3ESPIKE 2K25%3C/text%3E%3Ctext x=%2250%25%22 y=%2258%25%22 font-family=%22Arial%22 font-size=%2216%22 fill=%22%23764ba2%22 text-anchor=%22middle%22%3EProject Demo%3C/text%3E%3C/svg%3E'">
+                </div>
+                <div class="certificate-info">
+                    <h3>🚀 SPIKE 2K25 - Project Demo</h3>
+                    <p>National Level Technical Symposium</p>
+                    <p class="org">Bharath Institute (BIHER)</p>
+                    <p class="date">October 15, 2025</p>
+                    <span class="badge">Symposium</span>
+                </div>
+            </div>
+
+            <!-- SPIKE 2K25 - Quiz -->
+            <div class="certificate-item" onclick="openModal(8)">
+                <div class="image-container">
+                    <img src="quiz (p1).jpg" alt="SPIKE Quiz" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%22%23f5f5f5%22 width=%22400%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2242%25%22 font-family=%22Arial%22 font-size=%2220%22 fill=%22%23667eea%22 text-anchor=%22middle%22%3ESPIKE 2K25%3C/text%3E%3Ctext x=%2250%25%22 y=%2258%25%22 font-family=%22Arial%22 font-size=%2216%22 fill=%22%23764ba2%22 text-anchor=%22middle%22%3EQuiz%3C/text%3E%3C/svg%3E'">
+                </div>
+                <div class="certificate-info">
+                    <h3>🧠 SPIKE 2K25 - Quiz</h3>
+                    <p>National Level Technical Symposium</p>
+                    <p class="org">Bharath Institute (BIHER)</p>
+                    <p class="date">October 15, 2025</p>
+                    <span class="badge">Symposium</span>
+                </div>
+            </div>
+
+            <!-- Full Stack Web Development -->
+            <div class="certificate-item" onclick="openModal(9)">
+                <div class="image-container">
+                    <img src="Fullstack Workshop.jpg" alt="Full Stack Workshop" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%22%23ffffff%22 width=%22400%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2242%25%22 font-family=%22Arial%22 font-size=%2218%22 fill=%22%23667eea%22 text-anchor=%22middle%22%3EFull Stack Web Dev%3C/text%3E%3Ctext x=%2250%25%22 y=%2260%25%22 font-family=%22Arial%22 font-size=%2214%22 fill=%22%23764ba2%22 text-anchor=%22middle%22%3ECredo Systemz%3C/text%3E%3C/svg%3E'">
+                </div>
+                <div class="certificate-info">
+                    <h3>🌐 Full Stack Web Development</h3>
+                    <p>Workshop Participation</p>
+                    <p class="org">Credo Systemz, Chennai</p>
+                    <p class="date">July 31 - August 2, 2024</p>
+                    <span class="badge">Workshop</span>
+                </div>
+            </div>
+
+            <!-- Front End Development - HTML -->
+            <div class="certificate-item" onclick="openModal(10)">
+                <div class="image-container">
+                    <img src="Frontend Development Html .jpg" alt="HTML Course" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%22%23f8f8f8%22 width=%22400%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2245%25%22 font-family=%22Arial%22 font-size=%2220%22 fill=%22%23667eea%22 text-anchor=%22middle%22%3EFront End - HTML%3C/text%3E%3Ctext x=%2250%25%22 y=%2260%25%22 font-family=%22Arial%22 font-size=%2214%22 fill=%22%23764ba2%22 text-anchor=%22middle%22%3EGreat Learning%3C/text%3E%3C/svg%3E'">
+                </div>
+                <div class="certificate-info">
+                    <h3>📱 Front End Development - HTML</h3>
+                    <p>Online Course Completion</p>
+                    <p class="org">Great Learning Academy</p>
+                    <p class="date">July 2024</p>
+                    <span class="badge">Online Course</span>
+                </div>
+            </div>
+
+            <!-- Python Programming -->
+            <div class="certificate-item" onclick="openModal(11)">
+                <div class="image-container">
+                    <img src="Python.jpg" alt="Python Course" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%22%23f0f0f0%22 width=%22400%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2245%25%22 font-family=%22Arial%22 font-size=%2220%22 fill=%22%23667eea%22 text-anchor=%22middle%22%3EPython Programming%3C/text%3E%3Ctext x=%2250%25%22 y=%2260%25%22 font-family=%22Arial%22 font-size=%2214%22 fill=%22%23764ba2%22 text-anchor=%22middle%22%3EReliance Foundation%3C/text%3E%3C/svg%3E'">
+                </div>
+                <div class="certificate-info">
+                    <h3>🐍 Python Programming</h3>
+                    <p>3 Hours Online Course</p>
+                    <p class="org">Reliance Foundation Skilling Academy</p>
+                    <p class="date">August 13, 2025</p>
+                    <span class="badge">Skill India</span>
+                </div>
+            </div>
+             <div class="certificate-item" onclick="openModal(12)">
+                <div class="image-container">
+                    <img src="Nptel.jpg" alt="Nptel" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%22%23f0f0f0%22 width=%22400%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2245%25%22 font-family=%22Arial%22 font-size=%2220%22 fill=%22%23667eea%22 text-anchor=%22middle%22%3EPython Programming%3C/text%3E%3Ctext x=%2250%25%22 y=%2260%25%22 font-family=%22Arial%22 font-size=%2214%22 fill=%22%23764ba2%22 text-anchor=%22middle%22%3EReliance Foundation%3C/text%3E%3C/svg%3E'">
+                </div>
+                <div class="certificate-info">
+                    <h3>Introduction to Industry 4.0 and Industrial Internet of Things</h3>
+                    <p>8 months Online Course</p>
+                    <p class="org">NPTEL Swayam</p>
+                    <p class="date">July, 2024</p>
+                    <span class="badge">Skill India</span>
+                </div>
+            </div>
+             <div class="certificate-item" onclick="openModal(13)">
+                <div class="image-container">
+                    <img src="Tutedude Hackathon.jpeg" alt="Tutedude" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%22%23f0f0f0%22 width=%22400%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2245%25%22 font-family=%22Arial%22 font-size=%2220%22 fill=%22%23667eea%22 text-anchor=%22middle%22%3EPython Programming%3C/text%3E%3Ctext x=%2250%25%22 y=%2260%25%22 font-family=%22Arial%22 font-size=%2214%22 fill=%22%23764ba2%22 text-anchor=%22middle%22%3EReliance Foundation%3C/text%3E%3C/svg%3E'">
+                </div>
+                <div class="certificate-info">
+                    <h3>Tudedude Hackathon</h3>
+                    <p>Online Hackathon</p>
+                    <p class="org">Unstop</p>
+                    <p class="date">July 25, 2025</p>
+                    <span class="badge">Tudedude</span>
+                </div>
+            </div>
+               <div class="certificate-item" onclick="openModal(14)">
+                <div class="image-container">
+                    <img src="24 Hours Hackathon.jpeg" alt="TVS" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%22%23f0f0f0%22 width=%22400%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2245%25%22 font-family=%22Arial%22 font-size=%2220%22 fill=%22%23667eea%22 text-anchor=%22middle%22%3EPython Programming%3C/text%3E%3Ctext x=%2250%25%22 y=%2260%25%22 font-family=%22Arial%22 font-size=%2214%22 fill=%22%23764ba2%22 text-anchor=%22middle%22%3EReliance Foundation%3C/text%3E%3C/svg%3E'">
+                </div>
+                <div class="certificate-info">
+                    <h3>Dev Arena Hackathon</h3>
+                    <p>24 Hours Offline Hackathon</p>
+                    <p class="org">SRM Easwari (Techsaavy Club)</p>
+                    <p class="date">October 16, 2025</p>
+                    <span class="badge">TVS Next</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="myModal" class="modal" onclick="closeModal()">
+        <span class="close">&times;</span>
+        <span class="modal-nav modal-prev" onclick="event.stopPropagation(); navigateModal(-1)">&#10094;</span>
+        <img class="modal-content" id="modalImg">
+        <span class="modal-nav modal-next" onclick="event.stopPropagation(); navigateModal(1)">&#10095;</span>
+    </div>
+
+    <script>
+        let currentIndex = 0;
+        const images = document.querySelectorAll('.image-container img');
+        
+        function openModal(index) {
+            currentIndex = index;
+            const modal = document.getElementById('myModal');
+            const modalImg = document.getElementById('modalImg');
+            
+            modal.classList.add('active');
+            modalImg.src = images[index].src;
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('myModal');
+            modal.classList.remove('active');
+        }
+
+        function navigateModal(direction) {
+            currentIndex += direction;
+            if (currentIndex < 0) currentIndex = images.length - 1;
+            if (currentIndex >= images.length) currentIndex = 0;
+            
+            const modalImg = document.getElementById('modalImg');
+            modalImg.src = images[currentIndex].src;
+        }
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            } else if (event.key === 'ArrowLeft') {
+                navigateModal(-1);
+            } else if (event.key === 'ArrowRight') {
+                navigateModal(1);
+            }
+        });
+    </script>
+</body>
+</html>
